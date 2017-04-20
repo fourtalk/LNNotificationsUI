@@ -10,6 +10,7 @@
 #import "LNNotification.h"
 
 static const CGFloat LNNotificationRelativeLabelCollapse = 5.0 * 60.0;
+static const NSInteger LNNotificationMessageNumberOfLines = 10;
 
 @protocol _LNBackgroundViewCommon <NSObject>
 
@@ -151,7 +152,7 @@ static const CGFloat LNNotificationRelativeLabelCollapse = 5.0 * 60.0;
 		_messageLabel.font = [UIFont systemFontOfSize:13];
 		_messageLabel.textColor = style == LNNotificationBannerStyleDark ? [UIColor whiteColor] : [UIColor blackColor];
 		_messageLabel.translatesAutoresizingMaskIntoConstraints = NO;
-		_messageLabel.numberOfLines = 2;
+		_messageLabel.numberOfLines = LNNotificationMessageNumberOfLines;
 		
 		[_notificationContentView addSubview:_messageLabel];
 		
@@ -273,7 +274,7 @@ static const CGFloat LNNotificationRelativeLabelCollapse = 5.0 * 60.0;
 {
 	[super layoutSubviews];
 	
-	_messageLabel.preferredMaxLayoutWidth = self.bounds.size.width - (15 + _appIcon.frame.size.width + 11 + 15);
+	_messageLabel.preferredMaxLayoutWidth = self.bounds.size.width - (15 + _appIcon.frame.size.width + 8 + 15);
 }
 
 - (void)configureForNotification:(LNNotification*)notification

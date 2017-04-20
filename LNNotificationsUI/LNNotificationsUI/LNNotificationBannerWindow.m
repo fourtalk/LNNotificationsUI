@@ -16,6 +16,7 @@ static const NSTimeInterval LNNotificationFullDuration = 5.0;
 static const NSTimeInterval LNNotificationCutOffDuration = 2.5;
 
 static const CGFloat LNNotificationViewHeight = 68.0;
+static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 
 @interface LNNotification ()
 
@@ -52,7 +53,10 @@ static const CGFloat LNNotificationViewHeight = 68.0;
 
 @end
 
-@interface _LNStatusBarStylePreservingViewController : UIViewController @end
+@interface _LNStatusBarStylePreservingViewController : UIViewController
+    @property (nonatomic, strong) NSLayoutConstraint* _heightConstraint;
+@end
+
 @implementation _LNStatusBarStylePreservingViewController
 
 - (void)loadView
@@ -70,6 +74,16 @@ static const CGFloat LNNotificationViewHeight = 68.0;
 	return [[UIApplication sharedApplication] isStatusBarHidden];
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+    LNNotificationBannerWindow* window = (LNNotificationBannerWindow*)self.view.window;
+    if(window != nil)
+    {
+        [window updateViewToSize:size];
+    }
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+}
+
 @end
 
 @implementation LNNotificationBannerWindow
@@ -81,7 +95,9 @@ static const CGFloat LNNotificationViewHeight = 68.0;
 	UISwipeGestureRecognizer* _sgr;
 	UITapGestureRecognizer* _tgr;
 	
+    NSLayoutConstraint* _heightConstraint;
 	NSLayoutConstraint* _topConstraint;
+    CGFloat currentNotificationHeight;
 	
 	void (^_pendingCompletionHandler)();
 }
@@ -110,7 +126,8 @@ static const CGFloat LNNotificationViewHeight = 68.0;
 		_topConstraint = [NSLayoutConstraint constraintWithItem:_notificationView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:vc.view attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0];
 		
 		[vc.view addConstraint:_topConstraint];
-		[vc.view addConstraint:[NSLayoutConstraint constraintWithItem:_notificationView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1.0 constant:LNNotificationViewHeight]];
+        _heightConstraint = [NSLayoutConstraint constraintWithItem:_notificationView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1.0 constant:LNNotificationViewHeight];
+		[vc.view addConstraint:_heightConstraint];
 		
 		_topConstraint.constant = -LNNotificationViewHeight;
 		
@@ -167,7 +184,10 @@ static const CGFloat LNNotificationViewHeight = 68.0;
 	{
 		[_notificationView configureForNotification:notification];
 		
-		_topConstraint.constant = -LNNotificationViewHeight;
+        currentNotificationHeight = [self heightForMessage:notification.message toSize:self.frame.size];
+        
+		_topConstraint.constant = -currentNotificationHeight;
+        _heightConstraint.constant = currentNotificationHeight;
 		[self layoutIfNeeded];
 		
 		[UIView animateWithDuration:LNNotificationAnimationDuration delay:delay usingSpringWithDamping:500 initialSpringVelocity:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
@@ -257,7 +277,7 @@ static const CGFloat LNNotificationViewHeight = 68.0;
 	});
 	
 	[UIView animateWithDuration:LNNotificationAnimationDuration delay:delay usingSpringWithDamping:500 initialSpringVelocity:0 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState animations:^{
-		_topConstraint.constant = -LNNotificationViewHeight;
+		_topConstraint.constant = -currentNotificationHeight;
 		[self layoutIfNeeded];
 	} completion:^(BOOL finished) {
 		_lastShowDate = nil;
@@ -322,6 +342,28 @@ static const CGFloat LNNotificationViewHeight = 68.0;
 	}
 	
 	[super addConstraint:constraint];
+}
+
+- (CGFloat) heightForMessage:(NSString*)messageString toSize:(CGSize)size
+{
+    if(messageString.length > LNNotificationViewMaxMessageLenght)
+    {
+        messageString = [messageString substringWithRange:NSMakeRange(0, LNNotificationViewMaxMessageLenght)];
+    }
+    CGSize textSize = { size.width - 61, CGFLOAT_MAX };
+    CGRect frame = [messageString boundingRectWithSize:textSize
+                                      options:NSStringDrawingUsesLineFragmentOrigin
+                                   attributes:@{ NSFontAttributeName:[UIFont systemFontOfSize:13] }
+                                      context:nil];
+    CGFloat height = frame.size.height;
+    return height < LNNotificationViewHeight ? LNNotificationViewHeight : height + 34.5;
+}
+
+- (void) updateViewToSize:(CGSize)size
+{
+    _heightConstraint.constant = [self heightForMessage:_notificationView.currentNotification.message toSize:size];
+    currentNotificationHeight = _heightConstraint.constant;
+    [self layoutIfNeeded];
 }
 
 @end
