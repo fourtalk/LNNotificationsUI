@@ -10,7 +10,7 @@
 #import "LNNotification.h"
 
 static const CGFloat LNNotificationRelativeLabelCollapse = 5.0 * 60.0;
-static const NSInteger LNNotificationMessageNumberOfLines = 10;
+static const NSInteger LNNotificationMessageNumberOfLines = 100;
 
 @protocol _LNBackgroundViewCommon <NSObject>
 
