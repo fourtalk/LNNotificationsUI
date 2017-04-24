@@ -16,7 +16,7 @@ static const NSTimeInterval LNNotificationFullDuration = 5.0;
 static const NSTimeInterval LNNotificationCutOffDuration = 2.5;
 
 static const CGFloat LNNotificationViewHeight = 68.0;
-static const NSInteger LNNotificationViewMaxMessageLenght = 128;
+static const NSInteger LNNotificationViewMaxMessageLength = 128;
 
 @interface LNNotification ()
 
@@ -54,7 +54,6 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 @end
 
 @interface _LNStatusBarStylePreservingViewController : UIViewController
-    @property (nonatomic, strong) NSLayoutConstraint* _heightConstraint;
 @end
 
 @implementation _LNStatusBarStylePreservingViewController
@@ -99,7 +98,7 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 	NSLayoutConstraint* _topConstraint;
     CGFloat currentNotificationHeight;
 	
-	void (^_pendingCompletionHandler)(BOOL wasSwipe);
+	void (^_pendingCompletionHandler)(BOOL dismissedWithSwipe);
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -161,7 +160,7 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 	return _notificationViewShown;
 }
 
-- (void)presentNotification:(LNNotification *)notification completionBlock:(void (^)(BOOL wasSwipe))completionBlock
+- (void)presentNotification:(LNNotification *)notification completionBlock:(void (^)(BOOL dismissedWithSwipe))completionBlock
 {
 	NSDate* targetDate;
  
@@ -202,7 +201,7 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(LNNotificationCutOffDuration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 				if(_pendingCompletionHandler)
 				{
-					void (^prevPendingCompletionHandler)(BOOL wasSwipe) = _pendingCompletionHandler;
+					void (^prevPendingCompletionHandler)(BOOL dismissedWithSwipe) = _pendingCompletionHandler;
 					_pendingCompletionHandler = nil;
 					prevPendingCompletionHandler(false);
 				}
@@ -238,7 +237,7 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(LNNotificationCutOffDuration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 				if(_pendingCompletionHandler)
 				{
-					void (^prevPendingCompletionHandler)(BOOL wasSwipe) = _pendingCompletionHandler;
+					void (^prevPendingCompletionHandler)(BOOL dismissedWithSwipe) = _pendingCompletionHandler;
 					_pendingCompletionHandler = nil;
 					prevPendingCompletionHandler(false);
 				}
@@ -247,12 +246,12 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 	}
 }
 
-- (void)dismissNotificationViewWithCompletionBlock:(void (^)(BOOL wasSwipe))completionBlock
+- (void)dismissNotificationViewWithCompletionBlock:(void (^)(BOOL withSwipe))completionBlock
 {
-	[self _dismissNotificationViewWithCompletionBlock:completionBlock force:NO wasSwipe:false];
+	[self _dismissNotificationViewWithCompletionBlock:completionBlock force:NO withSwipe:false];
 }
 
-- (void)_dismissNotificationViewWithCompletionBlock:(void (^)(BOOL wasSwipe))completionBlock force:(BOOL)forced wasSwipe: (BOOL)wasSwipe
+- (void)_dismissNotificationViewWithCompletionBlock:(void (^)(BOOL dismissedWithSwipe))completionBlock force:(BOOL)forced withSwipe: (BOOL)withSwipe
 {
 	if(_notificationViewShown == NO)
 	{
@@ -289,9 +288,9 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 		
 		if(_pendingCompletionHandler)
 		{
-			void (^prevPendingCompletionHandler)(BOOL wasSwipe) = _pendingCompletionHandler;
+			void (^prevPendingCompletionHandler)(BOOL dismissedWithSwipe) = _pendingCompletionHandler;
 			_pendingCompletionHandler = nil;
-			prevPendingCompletionHandler(wasSwipe);
+			prevPendingCompletionHandler(withSwipe);
 		}
 	}];
 }
@@ -315,12 +314,12 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 
 - (void)_dismissFromSwipe
 {
-	[self _dismissNotificationViewWithCompletionBlock:_pendingCompletionHandler force:YES wasSwipe:true];
+	[self _dismissNotificationViewWithCompletionBlock:_pendingCompletionHandler force:YES withSwipe:true];
 }
 
 - (void)_userTappedNotification
 {
-	[self _dismissNotificationViewWithCompletionBlock:_pendingCompletionHandler force:YES wasSwipe:false];
+	[self _dismissNotificationViewWithCompletionBlock:_pendingCompletionHandler force:YES withSwipe:false];
 	
 	if(_notificationView.currentNotification != nil && _notificationView.currentNotification.defaultAction.handler != nil)
 	{
@@ -349,9 +348,9 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 
 - (CGFloat) heightForMessage:(NSString*)messageString toSize:(CGSize)size
 {
-    if(messageString.length > LNNotificationViewMaxMessageLenght)
+    if(messageString.length > LNNotificationViewMaxMessageLength)
     {
-        messageString = [messageString substringWithRange:NSMakeRange(0, LNNotificationViewMaxMessageLenght)];
+        messageString = [messageString substringWithRange:NSMakeRange(0, LNNotificationViewMaxMessageLength)];
     }
     CGSize textSize = { size.width - 61, size.height * 2/3 };
     CGRect frame = [messageString boundingRectWithSize:textSize
