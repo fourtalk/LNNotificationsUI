@@ -246,7 +246,7 @@ static const NSInteger LNNotificationViewMaxMessageLength = 128;
 	}
 }
 
-- (void)dismissNotificationViewWithCompletionBlock:(void (^)(BOOL withSwipe))completionBlock
+- (void)dismissNotificationViewWithCompletionBlock:(void (^)(BOOL dismissedWithSwipe))completionBlock
 {
 	[self _dismissNotificationViewWithCompletionBlock:completionBlock force:NO withSwipe:false];
 }

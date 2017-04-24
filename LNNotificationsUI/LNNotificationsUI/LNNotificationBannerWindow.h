@@ -17,7 +17,7 @@
 - (instancetype)initWithFrame:(CGRect)frame style:(LNNotificationBannerStyle)bannerStyle;
 
 - (void)presentNotification:(LNNotification*)notification completionBlock:(void(^)(BOOL dismissedWithSwipe))completionBlock;
-- (void)dismissNotificationViewWithCompletionBlock:(void (^)(BOOL withSwipe))completionBlock;
+- (void)dismissNotificationViewWithCompletionBlock:(void (^)(BOOL dismissedWithSwipe))completionBlock;
 - (void) updateViewToSize:(CGSize)size;
 
 @end
