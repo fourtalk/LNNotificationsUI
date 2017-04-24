@@ -223,6 +223,9 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 		
 		
 		[UIView animateWithDuration:0.75 * LNNotificationAnimationDuration delay:delay usingSpringWithDamping:500 initialSpringVelocity:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+            currentNotificationHeight = [self heightForMessage:notification.message toSize:self.frame.size];
+            _heightConstraint.constant = currentNotificationHeight;
+            [self layoutIfNeeded];
 			frame.origin.y = 0;
 			_notificationView.notificationContentView.frame = frame;
 			snapshot.alpha = 0;
