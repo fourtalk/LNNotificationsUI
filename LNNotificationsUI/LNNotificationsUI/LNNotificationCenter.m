@@ -251,7 +251,10 @@ static NSString *const _LNSettingsKey = @"LNNotificationSettingsKey";
 	
 	_currentlyAnimating = YES;
 	
-	void(^block)() = ^ {
+	void(^block)(BOOL wasSwipe) = ^(BOOL wasSwipe) {
+        if(wasSwipe) {
+            [self clearAllPendingNotifications];
+        }
 		_currentlyAnimating = NO;
 		
 		[self _handleBannerCanChange];

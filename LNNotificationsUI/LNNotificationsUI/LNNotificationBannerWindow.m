@@ -99,7 +99,7 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 	NSLayoutConstraint* _topConstraint;
     CGFloat currentNotificationHeight;
 	
-	void (^_pendingCompletionHandler)();
+	void (^_pendingCompletionHandler)(BOOL wasSwipe);
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -161,7 +161,7 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 	return _notificationViewShown;
 }
 
-- (void)presentNotification:(LNNotification *)notification completionBlock:(void (^)())completionBlock
+- (void)presentNotification:(LNNotification *)notification completionBlock:(void (^)(BOOL wasSwipe))completionBlock
 {
 	NSDate* targetDate;
  
@@ -202,9 +202,9 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(LNNotificationCutOffDuration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 				if(_pendingCompletionHandler)
 				{
-					void (^prevPendingCompletionHandler)() = _pendingCompletionHandler;
+					void (^prevPendingCompletionHandler)(BOOL wasSwipe) = _pendingCompletionHandler;
 					_pendingCompletionHandler = nil;
-					prevPendingCompletionHandler();
+					prevPendingCompletionHandler(false);
 				}
 			});
 		}];
@@ -235,21 +235,21 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(LNNotificationCutOffDuration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 				if(_pendingCompletionHandler)
 				{
-					void (^prevPendingCompletionHandler)() = _pendingCompletionHandler;
+					void (^prevPendingCompletionHandler)(BOOL wasSwipe) = _pendingCompletionHandler;
 					_pendingCompletionHandler = nil;
-					prevPendingCompletionHandler();
+					prevPendingCompletionHandler(false);
 				}
 			});
 		}];
 	}
 }
 
-- (void)dismissNotificationViewWithCompletionBlock:(void (^)())completionBlock
+- (void)dismissNotificationViewWithCompletionBlock:(void (^)(BOOL wasSwipe))completionBlock
 {
-	[self _dismissNotificationViewWithCompletionBlock:completionBlock force:NO];
+	[self _dismissNotificationViewWithCompletionBlock:completionBlock force:NO wasSwipe:false];
 }
 
-- (void)_dismissNotificationViewWithCompletionBlock:(void (^)())completionBlock force:(BOOL)forced
+- (void)_dismissNotificationViewWithCompletionBlock:(void (^)(BOOL wasSwipe))completionBlock force:(BOOL)forced wasSwipe: (BOOL)wasSwipe
 {
 	if(_notificationViewShown == NO)
 	{
@@ -286,9 +286,9 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 		
 		if(_pendingCompletionHandler)
 		{
-			void (^prevPendingCompletionHandler)() = _pendingCompletionHandler;
+			void (^prevPendingCompletionHandler)(BOOL wasSwipe) = _pendingCompletionHandler;
 			_pendingCompletionHandler = nil;
-			prevPendingCompletionHandler();
+			prevPendingCompletionHandler(wasSwipe);
 		}
 	}];
 }
@@ -312,12 +312,12 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
 
 - (void)_dismissFromSwipe
 {
-	[self _dismissNotificationViewWithCompletionBlock:_pendingCompletionHandler force:YES];
+	[self _dismissNotificationViewWithCompletionBlock:_pendingCompletionHandler force:YES wasSwipe:true];
 }
 
 - (void)_userTappedNotification
 {
-	[self _dismissNotificationViewWithCompletionBlock:_pendingCompletionHandler force:YES];
+	[self _dismissNotificationViewWithCompletionBlock:_pendingCompletionHandler force:YES wasSwipe:false];
 	
 	if(_notificationView.currentNotification != nil && _notificationView.currentNotification.defaultAction.handler != nil)
 	{
@@ -350,13 +350,13 @@ static const NSInteger LNNotificationViewMaxMessageLenght = 128;
     {
         messageString = [messageString substringWithRange:NSMakeRange(0, LNNotificationViewMaxMessageLenght)];
     }
-    CGSize textSize = { size.width - 61, CGFLOAT_MAX };
+    CGSize textSize = { size.width - 61, size.height * 2/3 };
     CGRect frame = [messageString boundingRectWithSize:textSize
                                       options:NSStringDrawingUsesLineFragmentOrigin
                                    attributes:@{ NSFontAttributeName:[UIFont systemFontOfSize:13] }
                                       context:nil];
     CGFloat height = frame.size.height;
-    return height < LNNotificationViewHeight ? LNNotificationViewHeight : height + 34.5;
+    return height + 34.5 < LNNotificationViewHeight ? LNNotificationViewHeight : height + 34.5;
 }
 
 - (void) updateViewToSize:(CGSize)size
