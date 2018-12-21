@@ -358,7 +358,17 @@ static const NSInteger LNNotificationViewMaxMessageLength = 128;
                                    attributes:@{ NSFontAttributeName:[UIFont systemFontOfSize:13] }
                                       context:nil];
     CGFloat height = frame.size.height;
-    return height + 34.5 < LNNotificationViewHeight ? LNNotificationViewHeight : height + 34.5;
+
+    CGFloat topInset = 0;
+    if (@available(iOS 11.0, *)) {
+        UIWindow *window = UIApplication.sharedApplication.keyWindow;
+        CGFloat topPadding = window.safeAreaInsets.top;
+        if (topPadding > 0) {
+            topInset = topPadding - 20;
+        }
+    }
+
+    return height + 34.5 < LNNotificationViewHeight ? LNNotificationViewHeight + topInset : height + 34.5 + topInset;
 }
 
 - (void) updateViewToSize:(CGSize)size

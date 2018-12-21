@@ -97,6 +97,15 @@ static const NSInteger LNNotificationMessageNumberOfLines = 100;
 		self.backgroundColor = [UIColor clearColor];
 		
 		UIView<_LNBackgroundViewCommon>* bgView;
+
+        CGFloat topInset = 0;
+        if (@available(iOS 11.0, *)) {
+            UIWindow *window = UIApplication.sharedApplication.keyWindow;
+            CGFloat topPadding = window.safeAreaInsets.top;
+            if (topPadding > 0) {
+                topInset = topPadding - 20;
+            }
+        }
 		
 		if([UIVisualEffectView class])
 		{
@@ -206,7 +215,7 @@ static const NSInteger LNNotificationMessageNumberOfLines = 100;
 		
 		[bgView.contentView addSubview:_notificationContentView];
 		
-		[bgView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_notificationContentView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_notificationContentView)]];
+		[bgView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-topInset-[_notificationContentView]|" options:0 metrics:@{@"topInset": @(7.5 + topInset)} views:NSDictionaryOfVariableBindings(_notificationContentView)]];
 		[bgView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_notificationContentView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_notificationContentView)]];
 		
 		UIView* drawer = [UIView new];
