@@ -214,8 +214,11 @@ static const NSInteger LNNotificationMessageNumberOfLines = 100;
 		[_notificationContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-15-[_appIcon]-11-[_titleLabel]-9.5-[dateBG]->=15-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_appIcon, dateBG, _titleLabel)]];
 		
 		[bgView.contentView addSubview:_notificationContentView];
-		
-		[bgView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-topInset-[_notificationContentView]|" options:0 metrics:@{@"topInset": @(7.5 + topInset)} views:NSDictionaryOfVariableBindings(_notificationContentView)]];
+
+        NSArray* constraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-topInset-[_notificationContentView]|" options:0 metrics:@{@"topInset": @(7.5 + topInset)} views:NSDictionaryOfVariableBindings(_notificationContentView)];
+        _notificationContentViewTopConstraint = [constraints objectAtIndex:0];
+
+        [bgView.contentView addConstraints:constraints];
 		[bgView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_notificationContentView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_notificationContentView)]];
 		
 		UIView* drawer = [UIView new];

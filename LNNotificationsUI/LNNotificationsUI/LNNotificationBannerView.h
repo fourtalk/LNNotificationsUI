@@ -16,6 +16,7 @@
 
 @property (nonatomic, strong, readonly) UIView* backgroundView;
 @property (nonatomic, strong, readonly) UIView* notificationContentView;
+@property (nonatomic, strong) NSLayoutConstraint* notificationContentViewTopConstraint;
 
 - (instancetype)initWithFrame:(CGRect)frame style:(LNNotificationBannerStyle)style;
 

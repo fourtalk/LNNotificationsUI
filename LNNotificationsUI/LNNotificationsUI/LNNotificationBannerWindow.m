@@ -359,6 +359,13 @@ static const NSInteger LNNotificationViewMaxMessageLength = 128;
                                       context:nil];
     CGFloat height = frame.size.height;
 
+    CGFloat topInset = [self safeAreaTopInset];
+
+    return height + 34.5 < LNNotificationViewHeight ? LNNotificationViewHeight + topInset : height + 34.5 + topInset;
+}
+
+- (CGFloat) safeAreaTopInset
+{
     CGFloat topInset = 0;
     if (@available(iOS 11.0, *)) {
         UIWindow *window = UIApplication.sharedApplication.keyWindow;
@@ -367,14 +374,14 @@ static const NSInteger LNNotificationViewMaxMessageLength = 128;
             topInset = topPadding - 20;
         }
     }
-
-    return height + 34.5 < LNNotificationViewHeight ? LNNotificationViewHeight + topInset : height + 34.5 + topInset;
+    return topInset;
 }
 
 - (void) updateViewToSize:(CGSize)size
 {
     _heightConstraint.constant = [self heightForMessage:_notificationView.currentNotification.message toSize:size];
     currentNotificationHeight = _heightConstraint.constant;
+    _notificationView.notificationContentViewTopConstraint.constant = [self safeAreaTopInset] + 7.5;
     [self layoutIfNeeded];
 }
 
