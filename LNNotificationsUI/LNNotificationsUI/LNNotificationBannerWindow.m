@@ -145,7 +145,7 @@ static const NSInteger LNNotificationViewMaxMessageLength = 128;
 		[_swipeView addGestureRecognizer:_tgr];
 		
 		[vc.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_swipeView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_swipeView)]];
-		[vc.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_swipeView(68)]" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_swipeView)]];
+		[vc.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_swipeView(==_notificationView)]" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_swipeView,_notificationView)]];
 		
 		[self setRootViewController:vc];
 		
