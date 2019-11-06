@@ -83,6 +83,31 @@ static const NSInteger LNNotificationViewMaxMessageLength = 128;
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 
+- (BOOL)shouldAutorotate
+{
+    return YES;
+}
+
+- (NSUInteger)supportedInterfaceOrientations
+{
+    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+    if (orientation == UIInterfaceOrientationPortrait)
+        return UIInterfaceOrientationMaskPortrait;
+    else if (orientation == UIInterfaceOrientationPortraitUpsideDown)
+        return UIInterfaceOrientationMaskPortraitUpsideDown;
+    else if (orientation == UIInterfaceOrientationLandscapeLeft)
+        return UIInterfaceOrientationMaskLandscapeLeft;
+    else if (orientation == UIInterfaceOrientationLandscapeRight)
+        return UIInterfaceOrientationMaskLandscapeRight;
+    return UIInterfaceOrientationMaskAll;
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation
+{
+    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+    return orientation;
+}
+
 @end
 
 @implementation LNNotificationBannerWindow
